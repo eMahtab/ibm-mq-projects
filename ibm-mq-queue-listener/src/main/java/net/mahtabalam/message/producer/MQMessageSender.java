@@ -1,6 +1,11 @@
 package net.mahtabalam.message.producer;
 
-import javax.jms.*;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.JMSException;
+import javax.jms.DeliveryMode;
+import javax.jms.TextMessage;
 import java.lang.IllegalStateException;
 
 public class MQMessageSender {

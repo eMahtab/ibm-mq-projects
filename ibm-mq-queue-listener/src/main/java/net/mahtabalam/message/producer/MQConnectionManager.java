@@ -2,8 +2,9 @@ package net.mahtabalam.message.producer;
 
 import com.ibm.mq.jms.MQQueueConnectionFactory;
 import com.ibm.msg.client.wmq.WMQConstants;
-
-import javax.jms.*;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.Session;
 import java.lang.IllegalStateException;
 
 

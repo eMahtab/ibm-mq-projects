@@ -1,6 +1,15 @@
-package net.mahtabalam.message.consumer2;
+package net.mahtabalam.message.consumer;
 
-import javax.jms.*;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.Queue;
+import javax.jms.DeliveryMode;
+import javax.jms.Message;
+import javax.jms.TextMessage;
+import javax.jms.BytesMessage;
+import javax.jms.ObjectMessage;
+import javax.jms.MapMessage;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicInteger;

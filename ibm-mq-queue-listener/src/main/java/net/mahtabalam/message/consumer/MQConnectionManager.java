@@ -1,17 +1,23 @@
 package net.mahtabalam.message.consumer;
 
-import com.ibm.mq.jms.MQQueueConnectionFactory;
+import com.ibm.mq.jms.MQConnectionFactory;
 import com.ibm.msg.client.wmq.WMQConstants;
 
-import javax.jms.*;
-import java.lang.IllegalStateException;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.Session;
 
+/**
+ * Manages IBM MQ connections
+ */
 public class MQConnectionManager {
 
     private final String host;
     private final int port;
     private final String channel;
     private final String queueManager;
+
+    private MQConnectionFactory connectionFactory;
     private Connection connection;
     private Session session;
 
@@ -22,69 +28,71 @@ public class MQConnectionManager {
         this.queueManager = queueManager;
     }
 
+    /**
+     * Establishes connection to IBM MQ
+     */
     public void connect() throws JMSException {
+        System.out.println("\n=========================================");
+        System.out.println("Connecting to IBM MQ...");
         System.out.println("=========================================");
-        System.out.println("Connecting to IBM MQ (Consumer)");
-        System.out.println("=========================================");
-        System.out.println("Queue Manager: " + queueManager);
-        System.out.println("Host: " + host + ":" + port);
+        System.out.println("Host: " + host);
+        System.out.println("Port: " + port);
         System.out.println("Channel: " + channel);
+        System.out.println("Queue Manager: " + queueManager);
         System.out.println("=========================================\n");
 
-        MQQueueConnectionFactory cf = createConnectionFactory();
+        // Create connection factory
+        connectionFactory = new MQConnectionFactory();
+        connectionFactory.setHostName(host);
+        connectionFactory.setPort(port);
+        connectionFactory.setChannel(channel);
+        connectionFactory.setQueueManager(queueManager);
+        connectionFactory.setTransportType(WMQConstants.WMQ_CM_CLIENT);
 
-        System.out.println("Establishing connection...");
-        connection = cf.createConnection();
-        connection.start();
+        // Create connection
+        connection = connectionFactory.createConnection();
 
+        // Create session (non-transacted, auto-acknowledge)
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-        System.out.println("✓ Connected successfully!\n");
+        // Start the connection (required for message listeners)
+        connection.start();
+
+        System.out.println("✓ Successfully connected to IBM MQ\n");
     }
 
-    private MQQueueConnectionFactory createConnectionFactory() throws JMSException {
-        MQQueueConnectionFactory cf = new MQQueueConnectionFactory();
-        cf.setHostName(host);
-        cf.setPort(port);
-        cf.setChannel(channel);
-        cf.setQueueManager(queueManager);
-        cf.setTransportType(WMQConstants.WMQ_CM_CLIENT);
-        cf.setCCSID(1208); // UTF-8 encoding
-        return cf;
+    /**
+     * Disconnects from IBM MQ
+     */
+    public void disconnect() {
+        System.out.println("\nDisconnecting from IBM MQ...");
+
+        try {
+            if (session != null) {
+                session.close();
+                System.out.println("✓ Session closed");
+            }
+        } catch (JMSException e) {
+            System.err.println("✗ Error closing session: " + e.getMessage());
+        }
+
+        try {
+            if (connection != null) {
+                connection.close();
+                System.out.println("✓ Connection closed");
+            }
+        } catch (JMSException e) {
+            System.err.println("✗ Error closing connection: " + e.getMessage());
+        }
+
+        System.out.println("=========================================\n");
     }
 
     public Session getSession() {
-        if (session == null) {
-            throw new IllegalStateException("Not connected. Call connect() first.");
-        }
         return session;
     }
 
     public Connection getConnection() {
-        if (connection == null) {
-            throw new IllegalStateException("Not connected. Call connect() first.");
-        }
         return connection;
-    }
-
-    public boolean isConnected() {
-        return connection != null && session != null;
-    }
-
-    public void disconnect() {
-        try {
-            if (session != null) {
-                session.close();
-                session = null;
-            }
-            if (connection != null) {
-                connection.close();
-                connection = null;
-                System.out.println("Connection closed gracefully.");
-            }
-        } catch (JMSException e) {
-            System.err.println("Error while closing connection:");
-            e.printStackTrace();
-        }
     }
 }
