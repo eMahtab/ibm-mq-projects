@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.mahtabalam</groupId>
-    <artifactId>ibm-mq-queue-listener</artifactId>
+    <artifactId>ibm-mq-queue-manager-cluster</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
